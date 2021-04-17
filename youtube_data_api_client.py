@@ -121,27 +121,34 @@ def main():
 
     # datetime to filename
     now = datetime.datetime.now()
-    dpath = (Path(__file__).parent/'DataCollection').resolve(strict=True)
-    fpath = dpath/now.strftime('%y%m%d.csv')
+    dpath = (Path(__file__).parent/'DataCollection'/now.strftime('%y%m')).resolve(strict=True)
+    fpath = dpath/now.strftime('%d.csv')
+    comppath = dpath/('comp-' + fpath.name);
     # japanese index; default lang:"en"
     index_jp=['識別番号','タイトル','視聴回数','高評価','低評価','コメント数','動画時間','投稿日','概要']
     # retrieve data from youtube data api
-    if not fpath.exists():
+    if not comppath.exists():
         youtube = YoutubeDataApiClient(
             YOUTUBE_DATA_CLIENT_SECRETS_FILE, YOUTUBE_DATA_API_CLIENT_SCOPES
         )
         video_ids = youtube.get_my_video_ids()
         videos = youtube.get_videos(video_ids, index=index_jp)
-        videos.to_csv(str(fpath), index=True, header=True, mode='w', encoding='utf-8')
+        videos.to_csv(str(comppath), index=True, header=True, mode='w', encoding='utf-8')
     else:
         # no connection
-        print("%s is already exists!" % fpath.name)
-        videos = pd.read_csv(str(fpath), index_col=0, encoding='utf-8')
+        print("%s is already exists!" % comppath.name)
+        videos = pd.read_csv(str(comppath), index_col=0, encoding='utf-8')
 
     # create slim-file: eliminate video's description
-    slimpath = dpath/('slim-'+fpath.name)
-    videos_slim = videos.iloc[:, 0:7]
-    videos_slim.to_csv(str(slimpath), index=False, mode='w', encoding='utf-8')
+    videos_slim = videos.iloc[:, 0:6]
+    videos_slim.to_csv(str(fpath), index=False, mode='w', encoding='utf-8')
+
+    # delete previous 'COMPLETE' data
+    yesterday = now - datetime.timedelta(days = 1)
+    predpath = (Path(__file__).parent/'DataCollection'/yesterday.strftime('%y%m')).resolve(strict=True)
+    prefpath = predpath/yesterday.strftime('comp-%d.csv')
+    # delete file
+    if prefpath.exists(): prefpath.unlink()
 
 if __name__ == '__main__':
     main()
