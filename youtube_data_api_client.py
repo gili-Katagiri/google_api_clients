@@ -121,7 +121,8 @@ def main():
 
     # datetime to filename
     now = datetime.datetime.now()
-    dpath = (Path(__file__).parent/'DataCollection'/now.strftime('%y%m')).resolve(strict=True)
+    dpath = (Path(__file__).parent/'DataCollection'/now.strftime('%y%m')).resolve()
+    if( not dpath.is_dir() ): dpath.mkdir()
     fpath = dpath/now.strftime('%d.csv')
     comppath = dpath/('comp-' + fpath.name);
     # japanese index; default lang:"en"
