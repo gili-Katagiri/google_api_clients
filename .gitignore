@@ -1,7 +1,7 @@
 # secret files
 .top_secrets.json
 .youtube-oauth2.json
-DataCollection
+DataCollection/????/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
